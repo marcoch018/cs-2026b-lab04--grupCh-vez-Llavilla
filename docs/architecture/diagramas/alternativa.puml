@@ -1,0 +1,37 @@
+@startuml
+skinparam dpi 220
+skinparam componentStyle rectangle
+skinparam defaultFontName Arial
+skinparam backgroundColor white
+title Alternativa A (descartada): BiblioUNSA con monolito en capas
+actor "Estudiante / Bibliotecario" as U
+node "Aplicación única (Django)" as APP {
+  package "Capa de presentación" {
+    [API REST + web] as P
+  }
+  package "Capa de lógica de negocio" {
+    [Catálogo, Reservas, Préstamos,\nMultas, Notificaciones] as L
+  }
+  package "Capa de acceso a datos" {
+    [Repositorios + clientes externos] as D
+  }
+}
+database "PostgreSQL\n(una sola BD)" as DB
+cloud "Proveedor de identidad" as IDP
+cloud "API del Sistema Académico" as ACA
+cloud "Servicio de correo" as SMTP
+U --> P
+P --> L
+L --> D
+D --> DB
+D --> IDP
+D --> ACA
+D --> SMTP
+note bottom of D
+  Puntaje 3,60 frente a 4,15 del monolito modular.
+  Rápido y barato, pero la autenticación y la API
+  académica quedan mezcladas con la lógica (Interoperabilidad: 2).
+  Los cambios se propagan entre capas (Modificabilidad: 2)
+  y hay menos aislamiento para el atributo crítico (Seguridad: 3).
+end note
+@enduml
