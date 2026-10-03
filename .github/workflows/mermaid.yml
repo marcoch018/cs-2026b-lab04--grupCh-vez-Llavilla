@@ -1,0 +1,33 @@
+name: Regenerar imágenes Mermaid
+
+on:
+  push:
+    paths:
+      - "docs/architecture/diagramas/**.mmd"
+
+permissions:
+  contents: write
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Instalar mermaid-cli
+        run: npm install -g @mermaid-js/mermaid-cli
+      - name: Renderizar PNG
+        run: |
+          echo "{\"args\": [\"--no-sandbox\"]}" > puppeteer-config.json
+          for f in docs/architecture/diagramas/*.mmd; do
+            name=$(basename "$f" .mmd)
+            mmdc -i "$f" -o "docs/architecture/diagramas/img/$name.png" -p puppeteer-config.json -b white
+          done
+          rm puppeteer-config.json
+      - name: Commit de las imágenes
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: regenerar imágenes Mermaid"
+          file_pattern: "docs/architecture/diagramas/img/*.png"
